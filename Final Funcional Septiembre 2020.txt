@@ -1,0 +1,106 @@
+import Text.Show.Functions
+import Data.List
+data Cliente = UnCliente {
+nombre::String,
+res::Int,
+amigos::[Cliente],
+bebidas::[Cliente -> Cliente] } deriving (Show)
+
+rodri = UnCliente "Rodri" 55 [] [tintico]
+marcos = UnCliente "Marcos" 34 [rodri] [klusener "guinda"]
+cristian = UnCliente "Cristian" (-10) [] [grog_XD, jarra_loca]
+ana = UnCliente "Ana" 120 [rodri, marcos] []
+
+
+	
+comoEsta:: Cliente -> String
+comoEsta (UnCliente nombre res amigos bebidas) | res > 50 = "Fresco"
+                                               | (res <= 50) && (length amigos > 1) = "Piola"
+                                               | otherwise = "Duro"
+
+
+reconocer:: Cliente -> Cliente -> Cliente
+reconocer cliente2 (UnCliente nombre res amigos bebidas) = UnCliente nombre res (agregarAmigos  cliente2 (UnCliente nombre res amigos bebidas)) bebidas
+
+agregarAmigos:: Cliente -> Cliente -> [Cliente]
+agregarAmigos (UnCliente nombre2 res2 amigos2 bebidas2) (UnCliente nombre res amigos bebidas) | (elem (dameNombre(UnCliente nombre2 res2 amigos2 bebidas2)) (dameNombreDeAmigos(UnCliente nombre res amigos bebidas))) == True = dameAmigos(UnCliente nombre res amigos bebidas)
+                                                                                              | dameNombre(UnCliente nombre res amigos bebidas) == dameNombre(UnCliente nombre2 res2 amigos2 bebidas2) = dameAmigos(UnCliente nombre res amigos bebidas)
+                                                                                              | otherwise = (UnCliente nombre2 res2 amigos2 bebidas2):(dameAmigos(UnCliente nombre res amigos bebidas))
+
+dameNombre (UnCliente nombre _ _ _) = nombre
+dameNombreDeAmigos (UnCliente _ _ amigos _) = [dameNombre x | x <- amigos]
+
+grog_XD :: Cliente -> Cliente
+grog_XD (UnCliente nombre _ amigos bebidas) = UnCliente nombre 0 amigos (bebidas++[grog_XD])
+
+bajarR:: Int -> Cliente -> Cliente
+bajarR c (UnCliente nombre res amigos bebidas) = UnCliente nombre (res - c) amigos bebidas
+
+jarra_loca:: Cliente -> Cliente
+jarra_loca (UnCliente nombre res amigos bebidas) = UnCliente nombre (res-10) (map(bajarR 10)amigos) (bebidas++[jarra_loca])
+
+klusener:: String -> Cliente -> Cliente
+klusener gusto (UnCliente nombre res amigos bebidas) = UnCliente nombre (res - length (gusto)) amigos (bebidas++[klusener gusto])
+
+tintico:: Cliente -> Cliente
+tintico cliente = bajarR (-(5*length (dameAmigos(cliente)))) cliente
+
+dameAmigos (UnCliente _ _ amigos _) = amigos
+
+soda:: Int -> Cliente -> Cliente
+soda f (UnCliente nombre res amigos bebidas) = UnCliente ('e':(replicate f 'r')++['p']++nombre) res amigos (bebidas++[soda f])
+
+
+
+rescatarse:: Int -> Cliente -> Cliente
+rescatarse horas (UnCliente nombre res amigos bebidas) = UnCliente nombre (resHora horas (UnCliente nombre res amigos bebidas)) amigos bebidas
+
+resHora horas cliente | horas > 3 = dameRes(cliente) + 200
+                      | otherwise = dameRes(cliente) + 100
+
+
+consulta cliente = ((klusener "huevo").(rescatarse 2).(klusener "chocolate").jarra_loca) cliente
+
+data Itinerario = UnItinerario {
+                  apodo::String,
+                  duracion::Float, 
+                  detalle::[Cliente -> Cliente] } deriving (Show)
+
+mezclaExplosiva = UnItinerario "Mezcla Explosiva" 2.5 [grog_XD, grog_XD, klusener "huevo", klusener "frutilla"]
+itinerarioBasico = UnItinerario "Itinerario Basico" 5 [klusener "huevo", rescatarse 2, klusener "chocolate", jarra_loca]
+salidaDeAmigos = UnItinerario "Salida de Amigos" 1 [soda 1, tintico, reconocer robertoCarlos, jarra_loca]
+
+robertoCarlos = UnCliente "Roberto Carlos" 165 [] []
+
+
+tomarTragos tragos cliente = (foldl (.) (last tragos) (reverse (init tragos))) cliente
+
+dameOtro:: Cliente -> Cliente
+dameOtro (UnCliente nombre res amigos bebidas) = (last bebidas) (UnCliente nombre res amigos bebidas)
+
+dameRes (UnCliente _ res _ _) = res
+
+
+cualesPuedeTomar tragos (UnCliente nombre res amigos bebidas) = [x | x <- tragos, (dameRes(x (UnCliente nombre res amigos bebidas)) > 0) ]
+
+cuantosPuedeTomar tragos (UnCliente nombre res amigos bebidas) = length (cualesPuedeTomar tragos (UnCliente nombre res amigos bebidas))
+
+
+dameDetalle (UnItinerario _ _ detalle) = detalle
+
+hacerItinerario itinerario cliente = (foldl (.) (last (dameDetalle itinerario)) (reverse (init (dameDetalle itinerario)))) cliente
+
+intensidadItinerario (UnItinerario apodo hora acciones) = genericLength(acciones)/hora
+
+itinerarioMasIntenso listItinerarios = maximum(map(intensidadItinerario) listItinerarios)
+
+listaIntensidades listItinerarios = zip(map(intensidadItinerario) listItinerarios) listItinerarios
+
+itinerarioResultante listItinerarios = snd(last([ x | x <- listaIntensidades(listItinerarios), (itinerarioMasIntenso listItinerarios) == (fst x)]))
+
+hacerElMasIntenso listItinerarios cliente = hacerItinerario (itinerarioResultante listItinerarios) cliente
+
+
+chuckNorris = UnCliente "Chuck Norris" 1000 [ana] listaChuckSoda
+listaChuckSoda = [ soda x | x <- [1,2..] ]
+
