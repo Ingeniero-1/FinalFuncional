@@ -11,16 +11,19 @@ marcos = UnCliente "Marcos" 34 [rodri] [klusener "guinda"]
 cristian = UnCliente "Cristian" (-10) [] [grog_XD, jarra_loca]
 ana = UnCliente "Ana" 120 [rodri, marcos] []
 
-
-	
-comoEsta:: Cliente -> String
-comoEsta (UnCliente nombre res amigos bebidas) | res > 50 = "Fresco"
-                                               | (res <= 50) && (length amigos > 1) = "Piola"
-                                               | otherwise = "Duro"
-
+--aca iba el Como esta, que lo pase a abajo para demostrarlo mejor
 
 reconocer:: Cliente -> Cliente -> Cliente
 reconocer cliente2 (UnCliente nombre res amigos bebidas) = UnCliente nombre res (agregarAmigos  cliente2 (UnCliente nombre res amigos bebidas)) bebidas
+
+-- reconocer funcionAmistosa cliente2 (UnCliente nombre res amigos bebidas) = UnCliente nombre res (funcionAmistosa  cliente2 (UnCliente nombre res amigos bebidas)) bebidasr 
+-- 
+
+-- cambiarResistencia funcion (UnCliente _ res _ _) = funcion res
+-- triple = (*3) 
+-- unTercio = (/3)
+
+
 
 agregarAmigos:: Cliente -> Cliente -> [Cliente]
 agregarAmigos (UnCliente nombre2 res2 amigos2 bebidas2) (UnCliente nombre res amigos bebidas) | (elem (dameNombre(UnCliente nombre2 res2 amigos2 bebidas2)) (dameNombreDeAmigos(UnCliente nombre res amigos bebidas))) == True = dameAmigos(UnCliente nombre res amigos bebidas)
@@ -29,6 +32,8 @@ agregarAmigos (UnCliente nombre2 res2 amigos2 bebidas2) (UnCliente nombre res am
 
 dameNombre (UnCliente nombre _ _ _) = nombre
 dameNombreDeAmigos (UnCliente _ _ amigos _) = [dameNombre x | x <- amigos]
+
+-- dameNombreDeAmigos (UnCliente _ _ amigos _) = map dameNombre amigos
 
 grog_XD :: Cliente -> Cliente
 grog_XD (UnCliente nombre _ amigos bebidas) = UnCliente nombre 0 amigos (bebidas++[grog_XD])
@@ -102,5 +107,21 @@ hacerElMasIntenso listItinerarios cliente = hacerItinerario (itinerarioResultant
 
 
 chuckNorris = UnCliente "Chuck Norris" 1000 [ana] listaChuckSoda
-listaChuckSoda = [ soda x | x <- [1,2..] ]
+listaChuckSoda = [ soda x | x <- [1,2..] ] 
 
+
+-- agregar Orden Superior
+
+comoEsta:: Cliente -> String
+comoEsta (UnCliente nombre res amigos bebidas) | res > 50 = "Fresco"
+                                               | (res <= 50) && (length amigos > 1) = "Piola"
+                                               | otherwise = "No tan Bien"
+
+
+comoEsta:: Cliente -> String
+comoEnRealidadEsta (UnCliente nombre res amigos bebidas)    | res > 50 = "Rescatable"
+  								| (res >= 20) && (res <= 50) = "Bastante Mal"
+  								| otherwise = "Muerto"
+
+
+dependeAQuienPregunte estado (UnCliente nombre res amigos bebidas) = "Yo lo veo " ++ estado (UnCliente nombre res amigos bebidas) 
